@@ -6,6 +6,8 @@ from tqdm.notebook import tqdm
 import torch
 import numpy as np
 import random
+import dill
+
 
 # Credit - Bahar
 class MapReader:
@@ -36,11 +38,12 @@ single_layer_converter = LayerToCharConverter([[0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 
 # Modifications - Ishaan
 
 class MapsDataset(Dataset):
-    def __init__(self, window_size, step_size, converter):
+    def __init__(self, window_size, step_size, sample_group_size, converter):
         self.char_size = converter.char_size
         self.converter = converter
         self.window_size = window_size
         self.step_size = step_size
+        self.sample_group_size = sample_group_size
         self.samples = []
         self.block_size = self.window_size[0] * self.window_size[1] - 1
 
@@ -62,6 +65,25 @@ class MapsDataset(Dataset):
                     for y in range(self.window_size[1])]
                     for x in range(self.window_size[0])])
     
+    #Generate image patches and write to data/output directory
+    def generate_patches(self, mapReader, image_groups=3):
+        img_group_number = 0
+        for i in range(0, mapReader.size[0] - self.window_size[0] + 1, self.step_size):
+            for j in range(0, mapReader.size[1] - self.window_size[1] + 1, self.step_size):
+                self.samples.append([[
+                (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1
+                for y in range(self.window_size[1])]
+                for x in range(self.window_size[0])])
+
+                if len(self.samples)==self.sample_group_size:
+                    with open("data/output/SF_group"+str(img_group_number)+".dill", 'wb+') as f:
+                        dill.dump(self.samples, f)
+                        f.close()    
+                    print("Image group {} saved in data/output/ !".format(img_group_number))
+                    self.samples.clear()
+                    img_group_number+=1
+        
+
     def shuffle(self):
         random.shuffle(self.samples)
 
