@@ -2,15 +2,19 @@
 name = "MapDatasetGenerator"
 version = "0.0.1"
 description = "MapDatasetGenerator"
-authors = ["Ishaan"<iparanja@ucsc.edu>, "Adhocmaster <adhocmaster@live.com>"]
+authors = ["Ishaan <iparanja@ucsc.edu>", "Adhocmaster <adhocmaster@live.com>"]
+readme = "README.md"
 license = "Mozilla Public License Version 2.0"
 packages = [
-    {include="junctionart", from="."},
-    {include="pyodrx", from="."}
+    {include="src", from="."}
 ]
 
 [tool.poetry.dependencies]
 python = "^3.7.9"
+dill = "^0.3.5.1"
+Pillow = "^9.2.0"
+torch = "^1.12.1"
+tqdm = "^4.64.1"
 
 
 [tool.poetry.dev-dependencies]
