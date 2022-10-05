@@ -2,7 +2,7 @@ from pyrosm import OSM, get_data
 import networkx as nx
 
 # Initialize reader
-dir_name = "data/osm/"
+dir_name = "../data/osm/"
 map_name = "SantaBarbara"
 osm = OSM(dir_name+map_name+".osm.pbf")
 for i in range(len(osm.get_boundaries()['osm_type'])):
