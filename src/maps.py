@@ -11,7 +11,8 @@ import dill
 
 # Credit - Bahar
 class MapReader:
-    def __init__(self, filename):
+    def __init__(self, filename, mapName):
+        self.mapName = mapName
         f = open(filename, 'r')
         data = f.read().split()
         self.size = (int(data[0]), int(data[1]))
@@ -38,7 +39,8 @@ single_layer_converter = LayerToCharConverter([[0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 
 # Modifications - Ishaan
 
 class MapsDataset(Dataset):
-    def __init__(self, window_size, step_size, sample_group_size, converter):
+    def __init__(self, window_size, step_size, sample_group_size, converter, outputDir="../data/output"):
+        self.outputDir = outputDir
         self.char_size = converter.char_size
         self.converter = converter
         self.window_size = window_size
@@ -46,6 +48,9 @@ class MapsDataset(Dataset):
         self.sample_group_size = sample_group_size
         self.samples = []
         self.block_size = self.window_size[0] * self.window_size[1] - 1
+
+        os.makedirs(self.outputDir, exist_ok=True)
+
 
     def __len__(self):
         return len(self.samples)
@@ -67,6 +72,14 @@ class MapsDataset(Dataset):
     
     #Generate image patches and write to data/output directory
     def generate_patches(self, mapReader, image_groups=3):
+        """_summary_
+
+        Args:
+            mapReader (MapReader): reader for a single big map!
+            image_groups (int, optional): _description_. Defaults to 3.
+        """
+        outDirectory = os.path.join(self.outputDir, mapReader.mapName, str(self.window_size))
+        os.makedirs(outDirectory, exist_ok=True)
         img_group_number = 0
         for i in range(0, mapReader.size[0] - self.window_size[0] + 1, self.step_size):
             for j in range(0, mapReader.size[1] - self.window_size[1] + 1, self.step_size):
@@ -76,7 +89,8 @@ class MapsDataset(Dataset):
                 for x in range(self.window_size[0])])
 
                 if len(self.samples)==self.sample_group_size:
-                    with open("data/output/SF_group"+str(img_group_number)+".dill", 'wb+') as f:
+                    path = os.path.join(outDirectory, str(img_group_number) + ".dill")
+                    with open(path, 'wb+') as f:
                         dill.dump(self.samples, f)
                         f.close()    
                     print("Image group {} saved in data/output/ !".format(img_group_number))

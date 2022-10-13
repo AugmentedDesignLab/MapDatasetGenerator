@@ -1,2 +1,6 @@
 data/*
 __pycache__/*
+*.pyc
+dist/*
+*.dill
+.vscode/settings.json
