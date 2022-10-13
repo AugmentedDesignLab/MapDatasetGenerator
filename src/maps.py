@@ -76,7 +76,7 @@ class MapsDataset(Dataset):
                 for x in range(self.window_size[0])])
 
                 if len(self.samples)==self.sample_group_size:
-                    with open("data/output/SF_group"+str(img_group_number)+".dill", 'wb+') as f:
+                    with open("../data/output/city_patches/dill/sf/"+str(img_group_number)+".dill", 'wb+') as f:
                         dill.dump(self.samples, f)
                         f.close()    
                     print("Image group {} saved in data/output/ !".format(img_group_number))
