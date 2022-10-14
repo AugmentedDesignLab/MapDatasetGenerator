@@ -5,3 +5,4 @@ Oct 14, 2022
 4. generate_patches normalizes the reader data once.
 5. window_size -> patch_size
 6. step_size -> stride
+7. 2d mode added.

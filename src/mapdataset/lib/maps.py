@@ -53,7 +53,7 @@ single_layer_converter = LayerToCharConverter([[0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 
 # Modifications - Ishaan, Muktadir
 
 class MapsDataset(Dataset):
-    def __init__(self, patch_size, stride, sample_group_size, converter, outputDir="../data/output"):
+    def __init__(self, patch_size, stride, sample_group_size, converter, outputDir="../data/output", mode='2d'):
         self.outputDir = outputDir
         self.char_size = converter.char_size
         self.converter = converter
@@ -63,17 +63,20 @@ class MapsDataset(Dataset):
         self.samples = []
         self.block_size = self.patch_size[0] * self.patch_size[1] - 1
 
+        self.mode = mode
+
         os.makedirs(self.outputDir, exist_ok=True)
-
-        
-
 
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        sample = (self.samples[idx], self.samples[idx], self.samples[idx])
-        return torch.from_numpy(sample).unsqueeze(0)
+        if self.mode =='2d':
+            sample = (self.samples[idx]) # 1 channel
+            return torch.from_numpy(np.array(sample)).unsqueeze(0).unsqueeze(0)
+        else:
+            sample = (self.samples[idx], self.samples[idx], self.samples[idx]) # 3 channels
+            return torch.from_numpy(sample).unsqueeze(0)
     
     def add(self, mapReader):
         mapReader.standardize(self.converter)
