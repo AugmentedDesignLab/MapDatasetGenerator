@@ -19,7 +19,7 @@ for i in range(nGroups):
     data = reader.load_group(groupNo=i)
     patchImgArray = reader.asImg(data[0])
     im = Image.fromarray(patchImgArray)
-    path = os.path.join(dillFolder, f"{i}.png")
+    path = os.path.join(dillFolder, f"{i}-0.png")
     im.save(path)
 
 
