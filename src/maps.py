@@ -26,6 +26,10 @@ class MapReader:
         logging.info(f"Normalizing the data in [-1, 1] using {converter.__class__.__name__}")
         #TODO Ishaan
         #  (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1
+        maxVal = len(converter.char_groups) - 1
+        for i in range(0, self.size[0]):
+            for j in range(0, self.size[1]):
+                self.data[i][j] = (converter.get_char(self.data[i][j]) / maxVal) * -2 + 1
         pass
 
 # Converter object that can return character for OpenStreetMap layer group
@@ -118,20 +122,20 @@ class MapsDataset(Dataset):
     def extractSample(self, mapReader, topLeft):
         i = topLeft[0]
         j = topLeft[1]
-        sample = [
-                    [
-                            (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
-                        for y in range(self.window_size[1])
-                    ]
-                    for x in range(self.window_size[0])
-                ]
         # sample = [
         #             [
-        #                     mapReader.data[i + x][j + y]
+        #                     (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
         #                 for y in range(self.window_size[1])
         #             ]
         #             for x in range(self.window_size[0])
         #         ]
+        sample = [
+                    [
+                            mapReader.data[i + x][j + y]
+                        for y in range(self.window_size[1])
+                    ]
+                    for x in range(self.window_size[0])
+                ]
         return np.asarray(sample)
 
 
