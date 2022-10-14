@@ -11,6 +11,7 @@ import logging
 
 
 # Credit - Bahar
+# Modifications - Muktadir
 class MapReader:
     def __init__(self, filename, mapName):
         self.mapName = mapName
@@ -19,6 +20,13 @@ class MapReader:
         self.size = (int(data[0]), int(data[1]))
         self.data = [[int(data[i * self.size[1] + j + 2]) for j in range(self.size[1])] for i in range(self.size[0])]
         logging.info(f"Your map is {self.size[0]}x{self.size[1]}")
+    
+
+    def standardize(self, converter):
+        logging.info(f"Normalizing the data in [-1, 1] using {converter.__class__.__name__}")
+        #TODO Ishaan
+        #  (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1
+        pass
 
 # Converter object that can return character for OpenStreetMap layer group
 # Credit - Bahar
@@ -38,7 +46,7 @@ single_layer_converter = LayerToCharConverter([[0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 
 
 # New Cell
 # Credit - Bahar
-# Modifications - Ishaan
+# Modifications - Ishaan, Muktadir
 
 class MapsDataset(Dataset):
     def __init__(self, window_size, step_size, sample_group_size, converter, outputDir="../data/output"):
@@ -52,6 +60,8 @@ class MapsDataset(Dataset):
         self.block_size = self.window_size[0] * self.window_size[1] - 1
 
         os.makedirs(self.outputDir, exist_ok=True)
+
+        
 
 
     def __len__(self):
@@ -80,6 +90,9 @@ class MapsDataset(Dataset):
             mapReader (MapReader): reader for a single big map!
             image_groups (int, optional): _description_. Defaults to 3.
         """
+
+        mapReader.standardize(converter=self.converter)
+
         if outDirectory is None:
             outDirectory = os.path.join(self.outputDir, mapReader.mapName, f"{self.window_size[0]}x{self.window_size[1]}", f"{self.step_size}x{self.step_size}")
         os.makedirs(outDirectory, exist_ok=True)
@@ -105,9 +118,16 @@ class MapsDataset(Dataset):
     def extractSample(self, mapReader, topLeft):
         i = topLeft[0]
         j = topLeft[1]
+        # sample = [
+        #             [
+        #                     (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
+        #                 for y in range(self.window_size[1])
+        #             ]
+        #             for x in range(self.window_size[0])
+        #         ]
         sample = [
                     [
-                            (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
+                            mapReader.data[i + x][j + y]
                         for y in range(self.window_size[1])
                     ]
                     for x in range(self.window_size[0])
