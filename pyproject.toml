@@ -1,12 +1,21 @@
 [tool.poetry]
 name = "MapDatasetGenerator"
 version = "0.0.1"
-description = "MapDatasetGenerator"
-authors = ["Ishaan <iparanja@ucsc.edu>", "Adhocmaster <adhocmaster@live.com>"]
+description = "Map dataset generator for learning map representations and generation"
+authors = ["Ishaan <iparanja@ucsc.edu>", "Golam Md Muktadir <muktadir@ucsc.edu", "Bahar Bateni <bbateni@ucsc.edu>"]
 readme = "README.md"
+
+homepage = "https://github.com/AugmentedDesignLab/MapDatasetGenerator"
+repository = "https://github.com/AugmentedDesignLab/MapDatasetGenerator"
+keywords = ["Map Dataset", "OSM to image"]
 license = "Mozilla Public License Version 2.0"
+
+include = [
+    "LICENSE",
+]
+
 packages = [
-    {include="src", from="."}
+    {include="MapDatasetGenerator", from="./src"}
 ]
 
 [tool.poetry.dependencies]
@@ -15,6 +24,7 @@ dill = "^0.3.5.1"
 Pillow = "^9.2.0"
 torch = "^1.12.1"
 tqdm = "^4.64.1"
+mbutil = "^0.3.0"
 
 
 [tool.poetry.dev-dependencies]

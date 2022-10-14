@@ -1,6 +1,6 @@
 dill==0.3.5.1
-numpy==1.23.3
 Pillow==9.2.0
 torch==1.12.1
 tqdm==4.64.1
 numpy==1.21.6
+mbutil==0.3.0
