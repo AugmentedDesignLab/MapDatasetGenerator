@@ -7,6 +7,7 @@ import torch
 import numpy as np
 import random
 import dill
+import logging
 
 
 # Credit - Bahar
@@ -71,32 +72,46 @@ class MapsDataset(Dataset):
                     for x in range(self.window_size[0])])
     
     #Generate image patches and write to data/output directory
-    def generate_patches(self, mapReader, image_groups=3):
+    def generate_patches(self, mapReader, image_groups=3, outDirectory=None):
         """_summary_
 
         Args:
             mapReader (MapReader): reader for a single big map!
             image_groups (int, optional): _description_. Defaults to 3.
         """
-        outDirectory = os.path.join(self.outputDir, mapReader.mapName, str(self.window_size))
+        if outDirectory is None:
+            outDirectory = os.path.join(self.outputDir, mapReader.mapName, str(self.window_size))
         os.makedirs(outDirectory, exist_ok=True)
+
         img_group_number = 0
         for i in range(0, mapReader.size[0] - self.window_size[0] + 1, self.step_size):
             for j in range(0, mapReader.size[1] - self.window_size[1] + 1, self.step_size):
-                self.samples.append([[
-                (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1
-                for y in range(self.window_size[1])]
-                for x in range(self.window_size[0])])
 
-                if len(self.samples)==self.sample_group_size:
+                sample = self.extractSample(mapReader, topLeft=(i, j))
+
+                self.samples.append(sample)
+
+                if len(self.samples) == self.sample_group_size:
                     path = os.path.join(outDirectory, str(img_group_number) + ".dill")
                     with open(path, 'wb+') as f:
                         dill.dump(self.samples, f)
                         f.close()    
-                    print("Image group {} saved in data/output/ !".format(img_group_number))
+                    logging.info(f"Image group {img_group_number} saved in {path}")
                     self.samples.clear()
                     img_group_number+=1
-        
+
+    def extractSample(self, mapReader, topLeft):
+        i = topLeft[0]
+        j = topLeft[1]
+        sample = [
+                    [
+                            (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
+                        for y in range(self.window_size[1])
+                    ]
+                    for x in range(self.window_size[0])
+                ]
+        return sample
+
 
     def shuffle(self):
         random.shuffle(self.samples)
