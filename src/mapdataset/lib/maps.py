@@ -53,15 +53,15 @@ single_layer_converter = LayerToCharConverter([[0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 
 # Modifications - Ishaan, Muktadir
 
 class MapsDataset(Dataset):
-    def __init__(self, window_size, step_size, sample_group_size, converter, outputDir="../data/output"):
+    def __init__(self, patch_size, stride, sample_group_size, converter, outputDir="../data/output"):
         self.outputDir = outputDir
         self.char_size = converter.char_size
         self.converter = converter
-        self.window_size = window_size
-        self.step_size = step_size
+        self.patch_size = patch_size
+        self.stride = stride
         self.sample_group_size = sample_group_size
         self.samples = []
-        self.block_size = self.window_size[0] * self.window_size[1] - 1
+        self.block_size = self.patch_size[0] * self.patch_size[1] - 1
 
         os.makedirs(self.outputDir, exist_ok=True)
 
@@ -79,12 +79,12 @@ class MapsDataset(Dataset):
         #return flat
     
     def add(self, mapReader):
-        for i in range(0, mapReader.size[0] - self.window_size[0] + 1, self.step_size):
-            for j in range(0, mapReader.size[1] - self.window_size[1] + 1, self.step_size):
+        for i in range(0, mapReader.size[0] - self.patch_size[0] + 1, self.stride):
+            for j in range(0, mapReader.size[1] - self.patch_size[1] + 1, self.stride):
                 self.samples.append([[
                     (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1
-                    for y in range(self.window_size[1])]
-                    for x in range(self.window_size[0])])
+                    for y in range(self.patch_size[1])]
+                    for x in range(self.patch_size[0])])
     
     #Generate image patches and write to data/output directory
     def generate_patches(self, mapReader, image_groups=3, outDirectory=None):
@@ -98,12 +98,12 @@ class MapsDataset(Dataset):
         mapReader.standardize(converter=self.converter)
 
         if outDirectory is None:
-            outDirectory = os.path.join(self.outputDir, mapReader.mapName, f"{self.window_size[0]}x{self.window_size[1]}", f"stride-{self.step_size}")
+            outDirectory = os.path.join(self.outputDir, mapReader.mapName, f"{self.patch_size[0]}x{self.patch_size[1]}", f"stride-{self.stride}")
         os.makedirs(outDirectory, exist_ok=True)
 
         img_group_number = 0
-        for i in range(0, mapReader.size[0] - self.window_size[0] + 1, self.step_size):
-            for j in range(0, mapReader.size[1] - self.window_size[1] + 1, self.step_size):
+        for i in range(0, mapReader.size[0] - self.patch_size[0] + 1, self.stride):
+            for j in range(0, mapReader.size[1] - self.patch_size[1] + 1, self.stride):
 
                 sample = self.extractSample(mapReader, topLeft=(i, j))
 
@@ -125,16 +125,16 @@ class MapsDataset(Dataset):
         # sample = [
         #             [
         #                     (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
-        #                 for y in range(self.window_size[1])
+        #                 for y in range(self.patch_size[1])
         #             ]
-        #             for x in range(self.window_size[0])
+        #             for x in range(self.patch_size[0])
         #         ]
         sample = [
                     [
                             mapReader.data[i + x][j + y]
-                        for y in range(self.window_size[1])
+                        for y in range(self.patch_size[1])
                     ]
-                    for x in range(self.window_size[0])
+                    for x in range(self.patch_size[0])
                 ]
         return np.asarray(sample)
 
@@ -143,8 +143,8 @@ class MapsDataset(Dataset):
         random.shuffle(self.samples)
 
     def get_train_test(self, train_ratio):
-        train_dataset = MapsDataset(self.window_size, self.step_size, self.converter)
-        test_dataset = MapsDataset(self.window_size, self.step_size, self.converter)
+        train_dataset = MapsDataset(self.patch_size, self.stride, self.converter)
+        test_dataset = MapsDataset(self.patch_size, self.stride, self.converter)
         train_size = int(len(self.samples) * train_ratio)
         train_dataset.samples = self.samples[:train_size]
         test_dataset.samples = self.samples[train_size:]

@@ -11,7 +11,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 root.addHandler(handler)
 
-import maps
+from lib import maps
 
 sfMap = maps.MapReader('../data/input/sf_layered.txt', "SF_Layered")
 mapsDataset = maps.MapsDataset((32, 32), 10, 1280, maps.single_layer_converter) #Third parameter is the group size
