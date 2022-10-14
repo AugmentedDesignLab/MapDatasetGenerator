@@ -99,6 +99,7 @@ class MapsDataset(Dataset):
                     logging.info(f"Image group {img_group_number} saved in {path}")
                     self.samples.clear()
                     img_group_number+=1
+        pass
 
     def extractSample(self, mapReader, topLeft):
         i = topLeft[0]

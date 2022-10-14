@@ -13,12 +13,12 @@ class ImgGroupReader:
 
     def load_group(self, group=0):
         if self.dir_path[-1]=='/':
-            with open(self.dir_path+self.location+"_group"+str(group)+".dill", 'rb') as d:
+            with open(self.dir_path+str(group)+".dill", 'rb') as d:
                 self.data = dill.load(d)
                 d.close()
         else:
             self.dir_path = self.dir_path + "/"
-            with open(self.dir_path+self.location+"_group"+str(group)+".dill", 'rb') as d:
+            with open(self.dir_path+str(group)+".dill", 'rb') as d:
                 self.data = dill.load(d)
                 d.close()
            
@@ -30,10 +30,14 @@ class ImgGroupReader:
             self.data = self.data.astype(np.uint8)
         return self.data
 
-reader = ImgGroupReader("data/output/")
-reader.load_group()
-data = reader.read_numpy()
-im = Image.fromarray(data[0])
-im.show()
+sf_groups = 117
+for i in range(sf_groups):
+    reader = ImgGroupReader("../data/output/city_patches/dill/washington")
+    reader.load_group(group=i)
+    data = reader.read_numpy()
+    im = Image.fromarray(data[0])
+    im.save('../data/output/city_patches/png/washington/'+str(i)+'.png')
+
+
 
 
