@@ -15,7 +15,7 @@ include = [
 ]
 
 packages = [
-    {include="MapDatasetGenerator", from="./src"}
+    {include="mapdataset", from="./src"}
 ]
 
 [tool.poetry.dependencies]
