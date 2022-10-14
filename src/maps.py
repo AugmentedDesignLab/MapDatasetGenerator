@@ -94,7 +94,7 @@ class MapsDataset(Dataset):
         mapReader.standardize(converter=self.converter)
 
         if outDirectory is None:
-            outDirectory = os.path.join(self.outputDir, mapReader.mapName, f"{self.window_size[0]}x{self.window_size[1]}", f"{self.step_size}x{self.step_size}")
+            outDirectory = os.path.join(self.outputDir, mapReader.mapName, f"{self.window_size[0]}x{self.window_size[1]}", f"stride-{self.step_size}")
         os.makedirs(outDirectory, exist_ok=True)
 
         img_group_number = 0
@@ -118,21 +118,21 @@ class MapsDataset(Dataset):
     def extractSample(self, mapReader, topLeft):
         i = topLeft[0]
         j = topLeft[1]
-        # sample = [
-        #             [
-        #                     (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
-        #                 for y in range(self.window_size[1])
-        #             ]
-        #             for x in range(self.window_size[0])
-        #         ]
         sample = [
                     [
-                            mapReader.data[i + x][j + y]
+                            (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
                         for y in range(self.window_size[1])
                     ]
                     for x in range(self.window_size[0])
                 ]
-        return sample
+        # sample = [
+        #             [
+        #                     mapReader.data[i + x][j + y]
+        #                 for y in range(self.window_size[1])
+        #             ]
+        #             for x in range(self.window_size[0])
+        #         ]
+        return np.asarray(sample)
 
 
     def shuffle(self):
