@@ -18,6 +18,7 @@ class MapReader:
         data = f.read().split()
         self.size = (int(data[0]), int(data[1]))
         self.data = [[int(data[i * self.size[1] + j + 2]) for j in range(self.size[1])] for i in range(self.size[0])]
+        logging.info(f"Your map is {self.size[0]}x{self.size[1]}")
 
 # Converter object that can return character for OpenStreetMap layer group
 # Credit - Bahar
@@ -80,7 +81,7 @@ class MapsDataset(Dataset):
             image_groups (int, optional): _description_. Defaults to 3.
         """
         if outDirectory is None:
-            outDirectory = os.path.join(self.outputDir, mapReader.mapName, str(self.window_size))
+            outDirectory = os.path.join(self.outputDir, mapReader.mapName, f"{self.window_size[0]}x{self.window_size[1]}", f"{self.step_size}x{self.step_size}")
         os.makedirs(outDirectory, exist_ok=True)
 
         img_group_number = 0
