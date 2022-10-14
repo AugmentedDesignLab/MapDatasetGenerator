@@ -2,3 +2,4 @@ Oct 14, 2022
 1. generate_patches has a new parameter for output directory
 2. default output directory now has a meaningful structure with patch sizes and step sizes
 3. Refactored ImageGroupReader
+4. generate_patches normalizes the reader data once.
