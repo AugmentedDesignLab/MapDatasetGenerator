@@ -76,12 +76,10 @@ class MapsDataset(Dataset):
         return torch.from_numpy(sample).unsqueeze(0)
     
     def add(self, mapReader):
+        mapReader.standardize(self.converter)
         for i in range(0, mapReader.size[0] - self.patch_size[0] + 1, self.stride):
             for j in range(0, mapReader.size[1] - self.patch_size[1] + 1, self.stride):
-                self.samples.append([[
-                    (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1
-                    for y in range(self.patch_size[1])]
-                    for x in range(self.patch_size[0])])
+                self.samples.append(self.extractSample(mapReader, topLeft=(i, j)))
 
     def loadPrecomputed(self, patchDirectory):
         #TODO
