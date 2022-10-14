@@ -73,10 +73,7 @@ class MapsDataset(Dataset):
 
     def __getitem__(self, idx):
         sample = (self.samples[idx], self.samples[idx], self.samples[idx])
-        return torch.from_numpy(np.array(sample)).unsqueeze(0)
-        #flat = torch.from_numpy(np.array(sample)).view(-1)
-        #flat = flat[self.perm].float()
-        #return flat
+        return torch.from_numpy(sample).unsqueeze(0)
     
     def add(self, mapReader):
         for i in range(0, mapReader.size[0] - self.patch_size[0] + 1, self.stride):
