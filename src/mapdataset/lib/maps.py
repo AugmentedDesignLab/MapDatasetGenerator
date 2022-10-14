@@ -82,6 +82,10 @@ class MapsDataset(Dataset):
                     (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1
                     for y in range(self.patch_size[1])]
                     for x in range(self.patch_size[0])])
+
+    def loadPrecomputed(self, patchDirectory):
+        #TODO
+        pass
     
     #Generate image patches and write to data/output directory
     def generate_patches(self, mapReader, image_groups=3, outDirectory=None):
