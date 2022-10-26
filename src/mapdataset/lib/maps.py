@@ -61,16 +61,27 @@ class MapsDataset(Dataset):
         self.stride = stride
         self.sample_group_size = sample_group_size
         self.samples = []
+        self.sampleGroupFiles = []
+        self.currentGroup = None
+        self.currentGroupNo = None
         self.block_size = self.patch_size[0] * self.patch_size[1] - 1
 
         self.mode = mode
 
         os.makedirs(self.outputDir, exist_ok=True)
 
+        self.__precomputedPatches = False
+
     def __len__(self):
+        if self.__precomputedPatches:
+            return len(self.sampleGroupFiles * self.sample_group_size)
         return len(self.samples)
 
     def __getitem__(self, idx):
+
+        if self.__precomputedPatches:
+            return self.__getPreComputedSample__(idx)
+
         if self.mode =='2d':
             sample = (self.samples[idx]) # 1 channel
             return torch.from_numpy(np.array(sample)).unsqueeze(0).unsqueeze(0)
@@ -84,12 +95,41 @@ class MapsDataset(Dataset):
             for j in range(0, mapReader.size[1] - self.patch_size[1] + 1, self.stride):
                 self.samples.append(self.extractSample(mapReader, topLeft=(i, j)))
 
-    def loadPrecomputed(self, patchDirectory):
+
+    def loadPatches(self, patchDirectory):
         #TODO
+
+        self.sampleFiles = [os.path.join(patchDirectory, f) for f in os.listdir(patchDirectory) if os.path.isfile(os.path.join(patchDirectory, f))]
+        logging.info(f"Loading {len(self.sampleFiles)} patches from {patchDirectory}")
+        self.__precomputedPatches = True
+
         pass
     
-    #Generate image patches and write to data/output directory
-    def generate_patches(self, mapReader, image_groups=3, outDirectory=None):
+    #region Generate image patches and write to data/output directory
+
+    def __getPreComputedSample__(self, idx):
+        # file = self.sampleFiles[idx]
+        # find group
+        groupNo = idx // self.sample_group_size
+        if self.currentGroupNo != groupNo:
+            # we don't have the group in memory
+            with open(self.sampleGroupFiles[groupNo]) as f:
+                self.currentGroup = dill.load(f)
+        
+        relativeIdx = idx % self.sample_group_size
+        return self.currentGroup[relativeIdx]
+
+
+
+
+    def __createDirectoryForPatches(self, mapReader, outDirectory=None):
+        
+        if outDirectory is None:
+            outDirectory = os.path.join(self.outputDir, mapReader.mapName, f"{self.patch_size[0]}x{self.patch_size[1]}", f"group-{self.sample_group_size}-stride-{self.stride}")
+        os.makedirs(outDirectory, exist_ok=True)
+        return outDirectory
+
+    def generate_patches(self, mapReader, outDirectory=None):
         """_summary_
 
         Args:
@@ -99,9 +139,7 @@ class MapsDataset(Dataset):
 
         mapReader.standardize(converter=self.converter)
 
-        if outDirectory is None:
-            outDirectory = os.path.join(self.outputDir, mapReader.mapName, f"{self.patch_size[0]}x{self.patch_size[1]}", f"stride-{self.stride}")
-        os.makedirs(outDirectory, exist_ok=True)
+        outDirectory = self.__createDirectoryForPatches(mapReader, outDirectory)
 
         img_group_number = 0
         for i in range(0, mapReader.size[0] - self.patch_size[0] + 1, self.stride):
@@ -124,13 +162,7 @@ class MapsDataset(Dataset):
     def extractSample(self, mapReader, topLeft):
         i = topLeft[0]
         j = topLeft[1]
-        # sample = [
-        #             [
-        #                     (self.converter.get_char(mapReader.data[i + x][j + y]) / (len(self.converter.char_groups) - 1)) * -2 + 1 # TODO this conversion should be done once in the original data instead of patches.
-        #                 for y in range(self.patch_size[1])
-        #             ]
-        #             for x in range(self.patch_size[0])
-        #         ]
+
         sample = [
                     [
                             mapReader.data[i + x][j + y]

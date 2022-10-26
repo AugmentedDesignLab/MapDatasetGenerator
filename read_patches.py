@@ -7,7 +7,7 @@ import os
 from mapdataset import ImageGroupReader
 
 
-dillFolder = "./data/output/SF_Layered/32x32/stride-10"
+dillFolder = "./data/output/SF_Layered/32x32/group-1280-stride-10"
 nGroups = 0
 # Iterate directory
 for path in os.listdir(dillFolder):
