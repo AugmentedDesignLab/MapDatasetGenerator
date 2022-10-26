@@ -99,11 +99,20 @@ class MapsDataset(Dataset):
     def loadPatches(self, patchDirectory):
         #TODO
 
-        self.sampleFiles = [os.path.join(patchDirectory, f) for f in os.listdir(patchDirectory) if os.path.isfile(os.path.join(patchDirectory, f))]
-        logging.info(f"Loading {len(self.sampleFiles)} patches from {patchDirectory}")
+        groupFiles = [os.path.join(patchDirectory, f) 
+                                    for f in os.listdir(patchDirectory) 
+                                        if os.path.isfile(os.path.join(patchDirectory, f)) and
+                                            f.endswith(".dill")]
+        self.sampleGroupFiles = sorted(groupFiles, key=lambda f: self.filenameComparator(f))
+        logging.info(f"Loading {len(self.sampleGroupFiles) * self.sample_group_size} patches from {patchDirectory}")
         self.__precomputedPatches = True
 
         pass
+
+    
+    def filenameComparator(self, f):
+        _, tail = os.path.split(f)
+        return int(tail.split(".")[0])
     
     #region Generate image patches and write to data/output directory
 
@@ -113,13 +122,13 @@ class MapsDataset(Dataset):
         groupNo = idx // self.sample_group_size
         if self.currentGroupNo != groupNo:
             # we don't have the group in memory
-            with open(self.sampleGroupFiles[groupNo]) as f:
+            logging.debug(f"Opening group file {self.sampleGroupFiles[groupNo]}")
+            with open(self.sampleGroupFiles[groupNo], "rb") as f:
                 self.currentGroup = dill.load(f)
         
         relativeIdx = idx % self.sample_group_size
+        logging.debug(f"patch {idx} is in group {groupNo} with relativeIdx {relativeIdx}")
         return self.currentGroup[relativeIdx]
-
-
 
 
     def __createDirectoryForPatches(self, mapReader, outDirectory=None):
