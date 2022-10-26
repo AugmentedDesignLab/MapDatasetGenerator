@@ -14,11 +14,12 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 root.addHandler(handler)
 
-from mapdataset import ImageGroupReader, single_layer_converter, MapsDataset, MapReader
+from mapdataset import ImageGroupReader, single_layer_converter, MapsDataset, MapReader, ImageUtils
 
 
 
-# dillFolder = "./data/output/SF_Layered/32x32/group-1280-stride-10"
+
+dillFolder = "./data/output/SF_Layered/32x32/group-1280-stride-10"
 # nGroups = 0
 # # Iterate directory
 # for path in os.listdir(dillFolder):
@@ -46,4 +47,8 @@ mapsDataset.loadPatches("./data/output/SF_Layered/32x32/group-1280-stride-10")
 patchNo = randint(0, len(mapsDataset))
 logging.info(f"reading patch {patchNo}")
 patch = mapsDataset[patchNo]
+
+im = ImageUtils.PILPatchToPILImg(patch)
+path = os.path.join(dillFolder, f"{patchNo}.png")
+im.save(path)
     
