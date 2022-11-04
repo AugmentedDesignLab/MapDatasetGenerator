@@ -53,7 +53,7 @@ single_layer_converter = LayerToCharConverter([[0], [1, 2, 3, 4, 5, 6, 7, 8, 9, 
 # Modifications - Ishaan, Muktadir
 
 class MapsDataset(Dataset):
-    def __init__(self, patch_size, stride, sample_group_size, converter, outputDir="../data/output", mode='2d'):
+    def __init__(self, patch_size, stride, sample_group_size, converter, outputDir="../data/output", mode='gray'):
         self.outputDir = outputDir
         self.char_size = converter.char_size
         self.converter = converter
@@ -80,9 +80,9 @@ class MapsDataset(Dataset):
     def __getitem__(self, idx):
 
         if self.__precomputedPatches:
-            return self.__getPreComputedSample__(idx)
+            return torch.from_numpy(self.__getPreComputedSample__(idx))
 
-        if self.mode =='2d':
+        if self.mode =='gray':
             sample = (self.samples[idx]) # 1 channel
             return torch.from_numpy(np.array(sample)).unsqueeze(0).unsqueeze(0)
         else:
@@ -139,7 +139,7 @@ class MapsDataset(Dataset):
         return outDirectory
 
     def generate_patches(self, mapReader, outDirectory=None):
-        """_summary_
+        """patches already have tensor like shape ready to be trained. No need to unsqueeze them.
 
         Args:
             mapReader (MapReader): reader for a single big map!
@@ -179,7 +179,11 @@ class MapsDataset(Dataset):
                     ]
                     for x in range(self.patch_size[0])
                 ]
-        return np.asarray(sample)
+        imArr = np.asarray(sample)
+        if self.mode == "gray":
+            return np.expand_dims(np.expand_dims(imArr, axis=0), axis=0)
+        else:
+            return np.expand_dims(imArr, axis=0)
 
 
     def shuffle(self):

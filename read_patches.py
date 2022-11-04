@@ -48,7 +48,9 @@ patchNo = randint(0, len(mapsDataset))
 logging.info(f"reading patch {patchNo}")
 patch = mapsDataset[patchNo]
 
-im = ImageUtils.PILPatchToPILImg(patch)
+# im = ImageUtils.PILPatchToPILImg(patch)
+# im = ImageUtils.PILPatchToPILImg(patch)
+im = ImageUtils.TorchNpPatchToPILImgGray(patch)
 path = os.path.join(dillFolder, f"{patchNo}.png")
 im.save(path)
     
