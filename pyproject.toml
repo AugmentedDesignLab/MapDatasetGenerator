@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "MapDatasetGenerator"
-version = "0.0.1"
+version = "0.0.2"
 description = "Map dataset generator for learning map representations and generation"
 authors = ["Ishaan <iparanja@ucsc.edu>", "Golam Md Muktadir <muktadir@ucsc.edu", "Bahar Bateni <bbateni@ucsc.edu>"]
 readme = "README.md"
